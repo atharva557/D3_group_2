@@ -1,0 +1,206 @@
+/* =========================================
+   REDDIT PULSE - THEME VARIABLES ONLY
+   Minimal CSS file for dark/light mode variables
+   ========================================= */
+
+:root {
+  /* DARK MODE (default) */
+  --bg-0: #0A0A0F;
+  --bg-1: #12121A;
+  --bg-2: #1F1F2B;
+  --bg-3: #2A2A38;
+
+  --text-primary: #FFFFFF;
+  --text-secondary: #A8A8C0;
+  --text-tertiary: #6B6B80;
+
+  --primary: #FF6B35;
+  --secondary: #004E89;
+  --success: #10B981;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+  --info: #3B82F6;
+
+  --border: rgba(255, 255, 255, 0.10);
+  --border-light: rgba(255, 255, 255, 0.05);
+  --overlay: rgba(0, 0, 0, 0.4);
+}
+
+/* LIGHT MODE */
+.light {
+  --bg-0: #F8F9FA;
+  --bg-1: #FFFFFF;
+  --bg-2: #F3F4F6;
+  --bg-3: #E5E7EB;
+
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --text-tertiary: #9CA3AF;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border-light: rgba(0, 0, 0, 0.04);
+  --overlay: rgba(0, 0, 0, 0.1);
+}
+
+/* Base styles */
+body {
+  background: var(--bg-0);
+  color: var(--text-primary);
+  font-family: 'Geist Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Navbar state classes */
+#nav-list.active {
+  display: flex !important;
+}
+
+#analyzeDropdown.show {
+  display: block !important;
+}
+
+/* Loading button state */
+.loading::after {
+  content: '';
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.6s linear infinite;
+  margin-left: 0.5rem;
+}
+
+/* OTP Box styles (for signup page) */
+.otp-box {
+  width: 3.5rem;
+  height: 4rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border-radius: 12px;
+  background-color: var(--bg-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.otp-box:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+  transform: translateY(-2px);
+}
+
+.otp-box::-webkit-outer-spin-button,
+.otp-box::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.otp-box[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Responsive table for mobile */
+@media (max-width: 768px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+
+  thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  tr {
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem;
+  }
+
+  td {
+    padding-left: 50% !important;
+    position: relative;
+    border: none;
+    border-bottom: 1px solid var(--border-light) !important;
+  }
+
+  td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  td:last-child {
+    border-bottom: none !important;
+  }
+
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+}
+
+
+/* TOAST NOTIFICATIONS (Ported from alerts.css) */
+.toast-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.toast {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 300px;
+  color: var(--text-primary);
+  animation: slideInRight 0.3s ease;
+}
+
+.toast-success { border-left: 4px solid var(--success); }
+.toast-error   { border-left: 4px solid var(--danger); }
+.toast-warning { border-left: 4px solid var(--warning); }
+.toast-info    { border-left: 4px solid var(--info); }
+
+.toast-message { flex: 1; font-size: 0.95rem; }
+
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1.25rem;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}

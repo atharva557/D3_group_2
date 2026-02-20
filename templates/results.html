@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Analysis Results - Reddit Pulse">
+  <title>Results - Reddit Pulse</title>
+
+  <!-- Theme initialization -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('reddit-pulse-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved ? saved === 'dark' : prefersDark;
+      if (!isDark) document.documentElement.classList.add('light');
+    })();
+  </script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'selector',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FF6B35',
+            secondary: '#004E89',
+            success: '#10B981',
+            danger: '#EF4444',
+            warning: '#F59E0B',
+            info: '#3B82F6',
+          },
+          fontFamily: {
+            sans: ['Geist Sans', 'Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Theme Variables CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-variables.css') }}">
+</head>
+
+<body class="min-h-screen pt-[70px]">
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 right-0 h-[70px] flex items-center justify-between px-8 max-md:px-4 z-50 border-b backdrop-blur-md shadow-sm bg-[var(--bg-2)] border-[var(--border)]">
+    <a href="{{ url_for('dashboard') }}"
+       class="text-2xl font-extrabold no-underline transition-colors duration-200 text-[var(--primary)] hover:text-[#FF5722]">
+      Reddit Pulse
+    </a>
+
+    <div id="mobile-menu"
+         class="md:hidden flex flex-col gap-[5px] cursor-pointer p-2"
+         aria-label="Toggle navigation menu">
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+    </div>
+
+    <ul id="nav-list"
+        class="hidden md:flex list-none gap-8 m-0 p-0 items-center
+               max-md:flex-col max-md:absolute max-md:top-[60px] max-md:left-0 max-md:right-0
+               max-md:w-full max-md:bg-[var(--bg-1)] max-md:p-6 max-md:gap-3
+               max-md:border-b max-md:border-[var(--border)] max-md:shadow-md">
+
+      <li><a href="{{ url_for('dashboard') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">Dashboard</a></li>
+
+      <li class="relative">
+        <button class="dropbtn flex items-center gap-1 font-medium py-2 transition-colors duration-200 bg-transparent border-0 cursor-pointer text-base text-[var(--text-secondary)] hover:text-[var(--primary)]"
+                aria-expanded="false"
+                aria-controls="analyzeDropdown">
+          Analyze ▾
+        </button>
+        <ul id="analyzeDropdown"
+            class="hidden absolute top-[150%] right-0 min-w-[200px] rounded-xl border border-[var(--border)] overflow-hidden backdrop-blur-xl z-10 bg-[var(--bg-2)] shadow-[0_10px_15px_rgba(0,0,0,0.2)]"
+            role="menu">
+          <li role="none"><a href="{{ url_for('analyze_own') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Statement</a></li>
+          <li role="none"><a href="{{ url_for('reddit_options') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Subreddit</a></li>
+          <li role="none"><a href="{{ url_for('analyze_post_page') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Post</a></li>
+
+        </ul>
+      </li>
+
+      <li><a href="{{ url_for('history') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">History</a></li>
+      <li><a href="{{ url_for('logout') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--danger)]">Log Out</a></li>
+      <li>
+        <button id="themeToggle" class="bg-transparent border-0 text-2xl p-2 cursor-pointer rounded-lg transition-all duration-200 hover:bg-[var(--bg-3)] hover:rotate-[20deg]" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+    <div class="w-full max-w-6xl mx-auto px-8 max-md:px-4 py-12 space-y-12">
+      <!-- Header Section -->
+      <div class="text-center mb-12">
+        <h2 class="text-sm uppercase tracking-widest mb-2 text-[var(--text-secondary)]">Overall Sentiment</h2>
+        <h1 id="dominantVibe"
+            class="text-6xl md:text-7xl font-black transition-all duration-500 drop-shadow-[0_4px_6px_rgba(0,0,0,0.3)]">
+          Calculating...
+        </h1>
+        <p class="mt-4 text-lg text-[var(--text-secondary)]">
+          Based on <span class="font-bold text-[var(--text-primary)]">{{ results|length }}</span> data points
+        </p>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Emotion Chart Card -->
+        <div class="flex flex-col items-center p-8 rounded-2xl border border-[var(--border)] bg-[var(--bg-2)] shadow-[0_10px_15px_rgba(0,0,0,0.2)]">
+          <h3 class="text-xl font-bold mb-6 pb-2 w-full border-b border-[var(--border-light)] text-[var(--text-primary)]">
+            Emotion Breakdown
+          </h3>
+          <div class="relative w-full max-w-xs h-64 flex items-center justify-center">
+            <canvas id="emotionChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Sentiment Chart Card -->
+        <div class="flex flex-col items-center p-8 rounded-2xl border border-[var(--border)] bg-[var(--bg-2)] shadow-[0_10px_15px_rgba(0,0,0,0.2)]">
+          <h3 class="text-xl font-bold mb-6 pb-2 w-full border-b border-[var(--border-light)] text-[var(--text-primary)]">
+            Sentiment Overview
+          </h3>
+          <div class="relative w-full max-w-xs h-64 flex items-center justify-center">
+            <canvas id="sentimentChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toggle Details Button -->
+      <div class="text-center">
+        <button onclick="toggleDetails()"
+                class="inline-flex items-center gap-2 px-8 py-3 border-0 rounded-full text-lg font-bold cursor-pointer transition-all duration-200 text-white shadow-lg bg-[var(--primary)] shadow-[0_4px_12px_rgba(255,107,53,0.3)] hover:bg-[#FF5722] hover:shadow-[0_8px_20px_rgba(255,107,53,0.4)]">
+          📋 Show Full Report
+        </button>
+      </div>
+
+      <!-- Details Table (Initially Hidden) -->
+      <div id="detailsSection" class="hidden w-full transition-all duration-500 ease-in-out">
+        <div class="overflow-hidden rounded-2xl shadow-xl border border-[var(--border)] mt-8 bg-[var(--bg-2)]">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="text-sm uppercase border-b border-[var(--border)] bg-[rgba(0,0,0,0.2)] text-[var(--text-secondary)]">
+                <th class="p-4 w-1/2 font-semibold">Content</th>
+                <th class="p-4 font-semibold">Sentiment</th>
+                <th class="p-4 font-semibold">Emotion</th>
+                <th class="p-4 font-semibold">Confidence</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--border)]">
+              {% for res in results %}
+              <tr class="transition-colors duration-200 hover:bg-[rgba(255,255,255,0.05)]">
+                <td class="p-4 text-sm leading-relaxed text-[var(--text-primary)]">
+                  {{ res.content[:100] }}{% if res.content|length > 100 %}...{% endif %}
+                </td>
+
+                <td class="p-4" data-label="Sentiment">
+                  {% if res.sentiment == 'positive' %}
+                    <span class="text-xs font-bold uppercase tracking-wide text-[var(--success)]">✓ Positive</span>
+                  {% elif res.sentiment == 'negative' %}
+                    <span class="text-xs font-bold uppercase tracking-wide text-[var(--danger)]">✗ Negative</span>
+                  {% elif res.sentiment == 'ambiguous' %}
+                    <span class="text-xs font-bold uppercase tracking-wide text-[#06B6D4]">? Ambiguous</span>
+                  {% else %}
+                    <span class="text-xs font-bold uppercase tracking-wide text-[var(--text-secondary)]">— Neutral</span>
+                  {% endif %}
+                </td>
+
+                <td class="p-4" data-label="Emotion">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold uppercase border border-[var(--border)] bg-[rgba(255,255,255,0.1)] text-[var(--text-primary)]">
+                    {{ res.primary_emotion }}
+                  </span>
+                </td>
+
+                <td class="p-4 text-xs font-mono text-[var(--text-secondary)]" data-label="Confidence">
+                  {{ (res.confidence * 100)|round|int }}%
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center mt-8">
+        <a href="{{ url_for('dashboard') }}"
+           class="inline-flex items-center gap-2 no-underline transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">
+          ← Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+
+  <script>
+    // Psychological Color Palette
+    const colorMap = {
+        'joy': '#FFD700', 'excitement': '#FFA500', 'optimism': '#F59E0B', 'amusement': '#FDBA74',
+        'love': '#EC4899', 'admiration': '#F472B6', 'desire': '#DB2777', 'caring': '#FB7185',
+        'gratitude': '#34D399', 'approval': '#10B981', 'pride': '#059669', 'relief': '#6EE7B7',
+        'anger': '#EF4444', 'annoyance': '#F87171', 'disapproval': '#B91C1C', 'disgust': '#7F1D1D',
+        'sadness': '#3B82F6', 'disappointment': '#60A5FA', 'grief': '#1E40AF', 'remorse': '#93C5FD',
+        'fear': '#7C3AED', 'nervousness': '#8B5CF6', 'embarrassment': '#C084FC',
+        'confusion': '#14B8A6', 'curiosity': '#2DD4BF', 'surprise': '#06B6D4', 'realization': '#0891B2',
+        'neutral': '#9CA3AF'
+    };
+
+    const sentimentColors = {
+        'positive': '#10B981',
+        'negative': '#EF4444',
+        'ambiguous': '#06B6D4',
+        'neutral': '#9CA3AF'
+    };
+
+    // Prepare Data
+    const resultsData = {{ results | tojson }};
+    const emotionCounts = {};
+    const sentimentCounts = {};
+
+    resultsData.forEach(item => {
+        const emo = item.primary_emotion;
+        emotionCounts[emo] = (emotionCounts[emo] || 0) + 1;
+        const sent = item.sentiment;
+        sentimentCounts[sent] = (sentimentCounts[sent] || 0) + 1;
+    });
+
+    const emoLabels = Object.keys(emotionCounts);
+    const emoData = Object.values(emotionCounts);
+    const emoColors = emoLabels.map(label => colorMap[label] || '#9CA3AF');
+
+    const sentLabels = Object.keys(sentimentCounts);
+    const sentData = Object.values(sentimentCounts);
+    const sentColors = sentLabels.map(label => sentimentColors[label] || '#9CA3AF');
+
+    // Dominant Vibe Header
+    let maxVal = 0;
+    let maxKey = 'Neutral';
+    for (let key in emotionCounts) {
+        if (emotionCounts[key] > maxVal) {
+            maxVal = emotionCounts[key];
+            maxKey = key;
+        }
+    }
+
+    const vibeHeader = document.getElementById('dominantVibe');
+    vibeHeader.textContent = maxKey.charAt(0).toUpperCase() + maxKey.slice(1);
+    vibeHeader.style.color = colorMap[maxKey] || '#9CA3AF';
+
+    // Chart Configuration
+    Chart.defaults.color = '#9CA3AF';
+    Chart.defaults.font.family = "'Geist Sans', sans-serif";
+
+
+    // Emotion Chart
+    new Chart(document.getElementById('emotionChart'), {
+        type: 'doughnut',
+        data: {
+            labels: emoLabels,
+            datasets: [{
+                data: emoData,
+                backgroundColor: emoColors,
+                borderWidth: 2,
+                borderColor: 'var(--bg-2)',
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 20, usePointStyle: true }
+                }
+            },
+            cutout: '75%'
+        }
+    });
+
+    // Sentiment Chart
+    new Chart(document.getElementById('sentimentChart'), {
+        type: 'pie',
+        data: {
+            labels: sentLabels,
+            datasets: [{
+                data: sentData,
+                backgroundColor: sentColors,
+                borderWidth: 2,
+                borderColor: 'var(--bg-2)',
+                hoverOffset: 10,
+
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 20, usePointStyle: true }
+                }
+            }
+        }
+    });
+
+    // Toggle Details Table
+    function toggleDetails() {
+        const section = document.getElementById('detailsSection');
+        section.classList.toggle('hidden');
+        if (!section.classList.contains('hidden')) {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Analysis History - Reddit Pulse">
+  <title>History - Reddit Pulse</title>
+
+  <!-- Theme initialization -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('reddit-pulse-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved ? saved === 'dark' : prefersDark;
+      if (!isDark) document.documentElement.classList.add('light');
+    })();
+  </script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'selector',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FF6B35',
+            secondary: '#004E89',
+            success: '#10B981',
+            danger: '#EF4444',
+            warning: '#F59E0B',
+            info: '#3B82F6',
+          },
+          fontFamily: {
+            sans: ['Geist Sans', 'Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Theme Variables CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-variables.css') }}">
+</head>
+
+<body class="min-h-screen pt-[70px]">
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 right-0 h-[70px] flex items-center justify-between px-8 max-md:px-4 z-50 border-b backdrop-blur-md shadow-sm bg-[var(--bg-2)] border-[var(--border)]">
+    <a href="{{ url_for('dashboard') }}"
+       class="text-2xl font-extrabold no-underline transition-colors duration-200 text-[var(--primary)] hover:text-[#FF5722]">
+      Reddit Pulse
+    </a>
+
+    <div id="mobile-menu"
+         class="md:hidden flex flex-col gap-[5px] cursor-pointer p-2"
+         aria-label="Toggle navigation menu">
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+    </div>
+
+    <ul id="nav-list"
+        class="hidden md:flex list-none gap-8 m-0 p-0 items-center
+               max-md:flex-col max-md:absolute max-md:top-[60px] max-md:left-0 max-md:right-0
+               max-md:w-full max-md:bg-[var(--bg-1)] max-md:p-6 max-md:gap-3
+               max-md:border-b max-md:border-[var(--border)] max-md:shadow-md">
+
+      <li><a href="{{ url_for('dashboard') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">Dashboard</a></li>
+
+      <li class="relative">
+        <button class="dropbtn flex items-center gap-1 font-medium py-2 transition-colors duration-200 bg-transparent border-0 cursor-pointer text-base text-[var(--text-secondary)] hover:text-[var(--primary)]"
+                aria-expanded="false"
+                aria-controls="analyzeDropdown">
+          Analyze ▾
+        </button>
+        <ul id="analyzeDropdown"
+            class="hidden absolute top-[150%] right-0 min-w-[200px] rounded-xl border border-[var(--border)] overflow-hidden backdrop-blur-xl z-10 bg-[var(--bg-2)] shadow-[0_10px_15px_rgba(0,0,0,0.2)]"
+            role="menu">
+          <li role="none"><a href="{{ url_for('analyze_own') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Statement</a></li>
+          <li role="none"><a href="{{ url_for('reddit_options') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Subreddit</a></li>
+                      <li role="none"><a href="{{ url_for('analyze_post_page') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Post</a></li>
+
+        </ul>
+      </li>
+
+      <li><a href="{{ url_for('history') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">History</a></li>
+      <li><a href="{{ url_for('logout') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--danger)]">Log Out</a></li>
+      <li>
+        <button id="themeToggle" class="bg-transparent border-0 text-2xl p-2 cursor-pointer rounded-lg transition-all duration-200 hover:bg-[var(--bg-3)] hover:rotate-[20deg]" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+    <div class="w-full max-w-6xl mx-auto px-8 max-md:px-4 py-8">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2 m-0 text-[var(--text-primary)]">Your Analysis History</h2>
+        <p class="text-base m-0 text-[var(--text-secondary)]">View all your previous analyses</p>
+      </div>
+
+      <div class="rounded-xl p-8 max-md:p-4 border border-[var(--border)] bg-[var(--bg-2)] shadow-[0_4px_6px_rgba(0,0,0,0.1)]">
+        {% if history and history|length > 0 %}
+          <table class="w-full border-collapse overflow-hidden" role="grid" aria-label="Analysis history">
+            <thead>
+              <tr class="bg-[var(--bg-3)]">
+                <th class="p-4 text-left font-semibold border-b border-[var(--border)] text-[var(--text-primary)]">Date</th>
+                <th class="p-4 text-left font-semibold border-b border-[var(--border)] text-[var(--text-primary)]">Type</th>
+                <th class="p-4 text-left font-semibold border-b border-[var(--border)] text-[var(--text-primary)]">Query</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for h in history %}
+                <tr class="transition-colors duration-200 border-b border-[var(--border)] hover:bg-[var(--bg-3)]">
+                  <td class="p-4 text-sm text-[var(--text-secondary)]" data-label="Date">
+                    {{ h.created_at if h.created_at else 'N/A' }}
+                  </td>
+                  <td class="p-4" data-label="Type">
+                    {% if h.search_type == "subreddit" or h.search_type == '1' %}
+                      <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wide border border-[rgba(255,107,53,0.3)] bg-[rgba(255,107,53,0.2)] text-[var(--primary)]">
+                        Subreddit
+                      </span>
+                    {% elif h.search_type == "topic" or h.search_type == '2' %}
+                      <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wide border border-[rgba(0,78,137,0.3)] bg-[rgba(0,78,137,0.2)] text-[var(--secondary)]">
+                        Topic
+                      </span>
+                      {% elif h.search_type == "user" or h.search_type == '3' %}
+                      <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wide border border-[rgba(0,78,137,0.3)] bg-[rgba(0,78,137,0.2)] text-[var(--secondary)]">
+                        User
+                      </span>
+                    {% else %}
+                      <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wide border border-[rgba(108,99,255,0.3)] bg-[rgba(108,99,255,0.2)] text-[#6c63ff]">
+                        Statement
+                      </span>
+                    {% endif %}
+                  </td>
+                  <td class="p-4 font-medium break-words text-[var(--text-primary)]" data-label="Query">
+                    {{ h.query_text }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="text-center py-12">
+            <p class="text-4xl mb-4">🔭</p>
+            <p class="text-lg mb-2 m-0 text-[var(--text-primary)]">No analysis history yet</p>
+            <p class="text-sm m-0 text-[var(--text-secondary)]">Start by analyzing a statement or exploring Reddit data.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="text-center mt-8">
+        <a href="{{ url_for('dashboard') }}"
+           class="inline-flex items-center gap-2 no-underline transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">
+          ← Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+</body>
+</html>

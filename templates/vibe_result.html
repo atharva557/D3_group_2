@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vibe Results</title><script>
+    (function() {
+      const saved = localStorage.getItem('reddit-pulse-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved ? saved === 'dark' : prefersDark;
+      if (!isDark) document.documentElement.classList.add('light');
+    })();
+  </script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'selector',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FF6B35',
+            secondary: '#004E89',
+            success: '#10B981',
+            danger: '#EF4444',
+            warning: '#F59E0B',
+            info: '#3B82F6',
+          },
+          fontFamily: {
+            sans: ['Geist Sans', 'Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Theme Variables CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-variables.css') }}">
+</head>
+
+<body class="min-h-screen pt-[70px] bg-bg-0 text-white flex flex-col items-center">
+
+  <nav class="fixed top-0 left-0 right-0 h-[70px] flex items-center justify-between px-8 max-md:px-4 z-50 border-b backdrop-blur-md shadow-sm bg-[var(--bg-2)] border-[var(--border)]">
+    <a href="{{ url_for('dashboard') }}"
+       class="text-2xl font-extrabold no-underline transition-colors duration-200 text-[var(--primary)] hover:text-[#FF5722]">
+      Reddit Pulse
+    </a>
+
+    <div id="mobile-menu"
+         class="md:hidden flex flex-col gap-[5px] cursor-pointer p-2"
+         aria-label="Toggle navigation menu">
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+    </div>
+
+    <ul id="nav-list"
+        class="hidden md:flex list-none gap-8 m-0 p-0 items-center
+               max-md:flex-col max-md:absolute max-md:top-[60px] max-md:left-0 max-md:right-0
+               max-md:w-full max-md:bg-[var(--bg-1)] max-md:p-6 max-md:gap-3
+               max-md:border-b max-md:border-[var(--border)] max-md:shadow-md">
+
+      <li><a href="{{ url_for('dashboard') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">Dashboard</a></li>
+
+      <li class="relative">
+        <button class="dropbtn flex items-center gap-1 font-medium py-2 transition-colors duration-200 bg-transparent border-0 cursor-pointer text-base text-[var(--text-secondary)] hover:text-[var(--primary)]"
+                aria-expanded="false"
+                aria-controls="analyzeDropdown">
+          Analyze ▾
+        </button>
+        <ul id="analyzeDropdown"
+            class="hidden absolute top-[150%] right-0 min-w-[200px] rounded-xl border border-[var(--border)] overflow-hidden backdrop-blur-xl z-10 bg-[var(--bg-2)] shadow-[0_10px_15px_rgba(0,0,0,0.2)]"
+            role="menu">
+          <li role="none"><a href="{{ url_for('analyze_own') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Statement</a></li>
+          <li role="none"><a href="{{ url_for('reddit_options') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Subreddit</a></li>
+                      <li role="none"><a href="{{ url_for('analyze_post_page') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Post</a></li>
+
+        </ul>
+      </li>
+
+      <li><a href="{{ url_for('history') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">History</a></li>
+      <li><a href="{{ url_for('logout') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--danger)]">Log Out</a></li>
+      <li>
+        <button id="themeToggle" class="bg-transparent border-0 text-2xl p-2 cursor-pointer rounded-lg transition-all duration-200 hover:bg-[var(--bg-3)] hover:rotate-[20deg]" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="w-full max-w-4xl p-6 space-y-8 animate-[fadeIn_0.5s_ease]">
+
+    <div class="bg-bg-2 border border-white/10 rounded-2xl p-10 text-center shadow-2xl relative overflow-hidden group">
+
+        <div class="absolute inset-0 opacity-20 blur-3xl transition-colors duration-1000"
+             style="background: {{ 'var(--success)' if score > 70 else ('var(--warning)' if score > 40 else 'var(--danger)') }};">
+        </div>
+
+        <h2 class="text-gray-400 uppercase tracking-widest text-sm font-bold mb-4 relative z-10">Compatibility Score</h2>
+
+        <div class="text-9xl font-black mb-4 relative z-10 transition-colors duration-500"
+             style="color: {{ 'var(--success)' if score > 70 else ('var(--warning)' if score > 40 else 'var(--danger)') }}">
+            {{ score }}%
+        </div>
+
+        <p class="text-2xl font-medium text-white relative z-10 mb-8">
+            {% if score > 80 %}
+                🚀 <span class="text-green-400">Perfect Fit!</span> This vibes with r/{{ subreddit }}.
+            {% elif score > 50 %}
+                ⚠️ <span class="text-yellow-400">It's Okay.</span> Tone matches, but check the rules.
+            {% else %}
+                🛑 <span class="text-red-400">Mismatch.</span> Read the room before posting.
+            {% endif %}
+        </p>
+
+        <div class="w-full bg-black/50 h-6 rounded-full overflow-hidden relative z-10 border border-white/10">
+            <div class="h-full transition-all duration-1000 ease-out"
+                 style="width: {{ score }}%; background: {{ 'var(--success)' if score > 70 else ('var(--warning)' if score > 40 else 'var(--danger)') }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="bg-bg-2 border border-white/10 rounded-xl p-8 hover:border-white/20 transition">
+            <h3 class="text-gray-400 text-xs font-bold uppercase mb-6 tracking-wider">Community Mood</h3>
+            <div class="flex items-center gap-6">
+                <div class="w-16 h-16 rounded-full bg-blue-500/10 flex items-center justify-center text-3xl">📊</div>
+                <div>
+                    <div class="text-3xl font-bold text-gray-400 mb-1">{{ sub_emotion|title }}</div>
+                    <div class="text-sm text-gray-400">Dominant Emotion in r/{{ subreddit }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-bg-2 border border-white/10 rounded-xl p-8 hover:border-white/20 transition">
+            <h3 class="text-gray-400 text-xs font-bold uppercase mb-6 tracking-wider">Your Draft Mood</h3>
+            <div class="flex items-center gap-6">
+                <div class="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center text-3xl">📝</div>
+                <div>
+                    <div class="text-3xl font-bold text-gray-400 mb-1">{{ user_emotion|title }}</div>
+                    <div class="text-sm text-gray-400">Detected Tone in your text</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="text-center mt-8">
+        <a href="{{ url_for('dashboard') }}"
+           class="inline-flex items-center gap-2 no-underline transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">
+          ← Back to Dashboard
+        </a>
+      </div>
+
+  </main>
+
+  <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+</body>
+</html>

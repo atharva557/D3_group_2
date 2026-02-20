@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Reddit Pulse - Sign in to your account">
+  <title>Sign In - Reddit Pulse</title>
+
+  <!-- Theme initialization (prevent flash) -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('reddit-pulse-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved ? saved === 'dark' : prefersDark;
+      if (!isDark) document.documentElement.classList.add('light');
+    })();
+  </script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'selector',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FF6B35',
+            secondary: '#004E89',
+            success: '#10B981',
+            danger: '#EF4444',
+            warning: '#F59E0B',
+            info: '#3B82F6',
+          },
+          fontFamily: {
+            sans: ['Geist Sans', 'Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Theme Variables CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-variables.css') }}">
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-8">
+  <!-- Theme toggle button -->
+  <button id="themeToggle"
+          class="fixed top-8 right-8 w-[50px] h-[50px] rounded-full flex items-center justify-center
+                 text-2xl cursor-pointer border border-[var(--border)] bg-[var(--bg-2)]
+                 transition-all duration-200 hover:bg-[var(--bg-3)] hover:rotate-[20deg]"
+          title="Toggle dark mode"
+          aria-label="Toggle dark mode">
+  </button>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-5xl items-center">
+    <!-- Brand side (hidden on mobile) -->
+    <div class="hidden md:block text-center">
+      <h1 class="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-[#FF5722] bg-clip-text text-transparent">
+        Reddit Pulse
+      </h1>
+      <p class="text-lg mb-8 text-[var(--text-secondary)]">
+        Analyze the emotional pulse of Reddit
+      </p>
+      <ul class="list-none p-0 inline-block text-left text-[var(--text-secondary)]">
+        <li class="mb-3">✓ Real-time sentiment analysis</li>
+        <li class="mb-3">✓ Track emotional trends</li>
+        <li class="mb-3">✓ Advanced community insights</li>
+      </ul>
+    </div>
+
+    <!-- Login form -->
+    <div class="rounded-2xl p-10 max-md:p-8 border border-[var(--border)] bg-[var(--bg-2)] shadow-[0_20px_25px_rgba(0,0,0,0.2)]">
+      <div class="mb-8 text-center">
+        <h2 class="text-2xl font-semibold mb-2 m-0 text-[var(--text-primary)]">Welcome Back</h2>
+        <p class="text-sm m-0 text-[var(--text-secondary)]">Sign in to your Reddit Pulse account</p>
+      </div>
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="flex gap-3 items-start p-4 rounded-lg border border-[var(--danger)] mb-6
+                      bg-[rgba(239,68,68,0.1)] animate-[slideIn_0.3s_ease]"
+               role="alert">
+            <span class="text-xl flex-shrink-0 leading-6">⚠️</span>
+            <div class="flex-1">
+              <p class="text-sm m-0 leading-6 text-[var(--text-primary)]">{{ messages[0] }}</p>
+            </div>
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form action="/login" method="POST" id="loginForm" data-validate="true">
+        <div class="mb-6">
+          <label for="username" class="block mb-2 font-semibold text-sm text-[var(--text-primary)]">
+            Username <span class="text-[var(--danger)]">*</span>
+          </label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="w-full px-4 py-3 border border-[var(--border)] rounded-lg font-sans text-base
+                   bg-[var(--bg-2)] text-[var(--text-primary)]
+                   transition-all duration-200 focus:outline-none
+                   focus:border-[var(--primary)] focus:bg-[var(--bg-1)]
+                   focus:shadow-[0_0_0_3px_rgba(255,107,53,0.1)]
+                   placeholder:text-[var(--text-tertiary)]"
+            placeholder="Enter your username"
+            required
+            aria-describedby="username-help">
+        </div>
+
+        <div class="mb-8">
+          <label for="password" class="block mb-2 font-semibold text-sm text-[var(--text-primary)]">
+            Password <span class="text-[var(--danger)]">*</span>
+          </label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="w-full px-4 py-3 border border-[var(--border)] rounded-lg font-sans text-base
+                   bg-[var(--bg-2)] text-[var(--text-primary)]
+                   transition-all duration-200 focus:outline-none
+                   focus:border-[var(--primary)] focus:bg-[var(--bg-1)]
+                   focus:shadow-[0_0_0_3px_rgba(255,107,53,0.1)]
+                   placeholder:text-[var(--text-tertiary)]"
+            placeholder="Enter your password"
+            required
+            aria-describedby="password-help">
+        </div>
+
+        <button type="submit"
+                class="w-full inline-flex items-center justify-center px-8 py-4 border-0 rounded-lg
+                       text-lg font-semibold cursor-pointer transition-all duration-200 gap-2
+                       whitespace-nowrap relative overflow-hidden no-underline text-white
+                       bg-[var(--primary)] shadow-[0_4px_12px_rgba(255,107,53,0.3)]
+                       hover:bg-[#FF5722] hover:-translate-y-0.5
+                       hover:shadow-[0_8px_20px_rgba(255,107,53,0.4)]">
+          Sign In
+        </button>
+      </form>
+
+      <div class="text-center mt-6 text-[var(--text-secondary)]">
+        Don't have an account?
+        <a href="/signup"
+           class="font-semibold no-underline transition-colors duration-200 text-[var(--primary)] hover:text-[#FF5722]">
+          Create one now
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/form-validator.js') }}"></script>
+</body>
+</html>

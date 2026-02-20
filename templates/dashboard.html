@@ -1,0 +1,397 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <meta name="description" content="Reddit Pulse - Dashboard">-->
+<!--  <title>Dashboard - Reddit Pulse</title>-->
+
+<!--  &lt;!&ndash; Theme initialization (prevent flash) &ndash;&gt;-->
+<!--  <script>-->
+<!--    (function() {-->
+<!--      const saved = localStorage.getItem('reddit-pulse-theme');-->
+<!--      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;-->
+<!--      const isDark = saved ? saved === 'dark' : prefersDark;-->
+<!--      if (!isDark) document.documentElement.classList.add('light');-->
+<!--    })();-->
+<!--  </script>-->
+
+<!--  &lt;!&ndash; Tailwind CSS CDN &ndash;&gt;-->
+<!--  <script src="https://cdn.tailwindcss.com"></script>-->
+<!--  -->
+<!--  &lt;!&ndash; Tailwind Config &ndash;&gt;-->
+<!--  <script>-->
+<!--    tailwind.config = {-->
+<!--      darkMode: 'selector',-->
+<!--      theme: {-->
+<!--        extend: {-->
+<!--          colors: {-->
+<!--            primary: '#FF6B35',-->
+<!--            secondary: '#004E89',-->
+<!--            'bg-0': '#0A0A0F',-->
+<!--            'bg-1': '#12121A',-->
+<!--            'bg-2': '#1F1F2B',-->
+<!--            'bg-3': '#2A2A38',-->
+<!--            success: '#10B981',-->
+<!--            danger: '#EF4444',-->
+<!--            warning: '#F59E0B',-->
+<!--            info: '#3B82F6',-->
+<!--          },-->
+<!--          fontFamily: {-->
+<!--            sans: ['Geist Sans', 'Inter', 'sans-serif'],-->
+<!--          },-->
+<!--        }-->
+<!--      }-->
+<!--    }-->
+<!--  </script>-->
+
+<!--  &lt;!&ndash; Custom Styles for Theme Variables &ndash;&gt;-->
+<!--  <style>-->
+<!--    :root {-->
+<!--      &#45;&#45;bg-0: #0A0A0F;-->
+<!--      &#45;&#45;bg-1: #12121A;-->
+<!--      &#45;&#45;bg-2: #1F1F2B;-->
+<!--      &#45;&#45;bg-3: #2A2A38;-->
+<!--      &#45;&#45;text-primary: #FFFFFF;-->
+<!--      &#45;&#45;text-secondary: #A8A8C0;-->
+<!--      &#45;&#45;primary: #FF6B35;-->
+<!--      &#45;&#45;danger: #EF4444;-->
+<!--      &#45;&#45;border: rgba(255, 255, 255, 0.10);-->
+<!--    }-->
+
+<!--    .light {-->
+<!--      &#45;&#45;bg-0: #F8F9FA;-->
+<!--      &#45;&#45;bg-1: #FFFFFF;-->
+<!--      &#45;&#45;bg-2: #F3F4F6;-->
+<!--      &#45;&#45;bg-3: #E5E7EB;-->
+<!--      &#45;&#45;text-primary: #111827;-->
+<!--      &#45;&#45;text-secondary: #4B5563;-->
+<!--      &#45;&#45;border: rgba(0, 0, 0, 0.08);-->
+<!--    }-->
+
+<!--    body {-->
+<!--      background: var(&#45;&#45;bg-0);-->
+<!--      color: var(&#45;&#45;text-primary);-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+
+<!--<body class="min-h-screen pt-[70px]">-->
+<!--  &lt;!&ndash; Navbar &ndash;&gt;-->
+<!--  <nav class="fixed top-0 left-0 right-0 h-[70px] flex items-center justify-between px-8 z-50 border-b backdrop-blur-md shadow-sm"-->
+<!--       style="background: var(&#45;&#45;bg-2); border-color: var(&#45;&#45;border);">-->
+<!--    <a href="{{ url_for('dashboard') }}" class="text-2xl font-extrabold no-underline transition-colors duration-200" -->
+<!--       style="color: var(&#45;&#45;primary);"-->
+<!--       onmouseover="this.style.color='#FF5722'" -->
+<!--       onmouseout="this.style.color='var(&#45;&#45;primary)'">-->
+<!--      Reddit Pulse-->
+<!--    </a>-->
+
+<!--    <div id="mobile-menu" class="md:hidden flex flex-col gap-[5px] cursor-pointer p-2" aria-label="Toggle navigation menu">-->
+<!--      <span class="w-[25px] h-[3px] rounded-sm transition-all duration-300" style="background: var(&#45;&#45;text-primary);"></span>-->
+<!--      <span class="w-[25px] h-[3px] rounded-sm transition-all duration-300" style="background: var(&#45;&#45;text-primary);"></span>-->
+<!--      <span class="w-[25px] h-[3px] rounded-sm transition-all duration-300" style="background: var(&#45;&#45;text-primary);"></span>-->
+<!--    </div>-->
+
+<!--    <ul id="nav-list" class="hidden md:flex list-none gap-8 m-0 p-0 items-center max-md:flex-col max-md:absolute max-md:top-[60px] max-md:left-0 max-md:right-0 max-md:w-full max-md:p-6 max-md:gap-3 max-md:border-b max-md:shadow-md"-->
+<!--        style="max-width: none; background: var(&#45;&#45;bg-1); border-color: var(&#45;&#45;border);">-->
+<!--      <li><a href="{{ url_for('dashboard') }}" class="no-underline font-medium py-2 transition-colors duration-200" style="color: var(&#45;&#45;text-secondary);" onmouseover="this.style.color='var(&#45;&#45;primary)'" onmouseout="this.style.color='var(&#45;&#45;text-secondary)'">Dashboard</a></li>-->
+
+<!--      <li class="relative">-->
+<!--        <button class="dropbtn flex items-center gap-1 font-medium py-2 transition-colors duration-200 bg-transparent border-0 cursor-pointer text-base" -->
+<!--                style="color: var(&#45;&#45;text-secondary);"-->
+<!--                onmouseover="this.style.color='var(&#45;&#45;primary)'" -->
+<!--                onmouseout="this.style.color='var(&#45;&#45;text-secondary)'"-->
+<!--                aria-expanded="false" -->
+<!--                aria-controls="analyzeDropdown">-->
+<!--          Analyze ▾-->
+<!--        </button>-->
+<!--        <ul id="analyzeDropdown" class="hidden absolute top-[150%] right-0 min-w-[200px] rounded-xl border overflow-hidden backdrop-blur-xl z-10 animate-[fadeIn_0.2s_ease]"-->
+<!--            style="background: var(&#45;&#45;bg-2); border-color: var(&#45;&#45;border); box-shadow: 0 10px 15px var(&#45;&#45;overlay);"-->
+<!--            role="menu">-->
+<!--          <li role="none">-->
+<!--            <a href="{{ url_for('analyze_own') }}" -->
+<!--               role="menuitem"-->
+<!--               class="block px-5 py-3 no-underline transition-all duration-200"-->
+<!--               style="color: var(&#45;&#45;text-secondary);"-->
+<!--               onmouseover="this.style.background='rgba(255, 107, 53, 0.1)'; this.style.color='var(&#45;&#45;primary)'; this.style.paddingLeft='1.5rem';"-->
+<!--               onmouseout="this.style.background='transparent'; this.style.color='var(&#45;&#45;text-secondary)'; this.style.paddingLeft='1.25rem';">-->
+<!--              Statement-->
+<!--            </a>-->
+<!--          </li>-->
+<!--          <li role="none">-->
+<!--            <a href="{{ url_for('reddit_options') }}" -->
+<!--               role="menuitem"-->
+<!--               class="block px-5 py-3 no-underline transition-all duration-200"-->
+<!--               style="color: var(&#45;&#45;text-secondary);"-->
+<!--               onmouseover="this.style.background='rgba(255, 107, 53, 0.1)'; this.style.color='var(&#45;&#45;primary)'; this.style.paddingLeft='1.5rem';"-->
+<!--               onmouseout="this.style.background='transparent'; this.style.color='var(&#45;&#45;text-secondary)'; this.style.paddingLeft='1.25rem';">-->
+<!--              Subreddit-->
+<!--            </a>-->
+<!--          </li>-->
+<!--        </ul>-->
+<!--      </li>-->
+
+<!--      <li><a href="{{ url_for('history') }}" class="no-underline font-medium py-2 transition-colors duration-200" style="color: var(&#45;&#45;text-secondary);" onmouseover="this.style.color='var(&#45;&#45;primary)'" onmouseout="this.style.color='var(&#45;&#45;text-secondary)'">History</a></li>-->
+<!--      <li><a href="{{ url_for('logout') }}" class="no-underline font-medium py-2 transition-colors duration-200" style="color: var(&#45;&#45;danger);">Log Out</a></li>-->
+<!--      <li>-->
+<!--        <button id="themeToggle" class="bg-transparent border-0 text-2xl p-2 cursor-pointer rounded-lg transition-all duration-200 hover:rotate-[20deg]" -->
+<!--                title="Toggle dark mode" -->
+<!--                aria-label="Toggle dark mode"-->
+<!--                onmouseover="this.style.background='var(&#45;&#45;bg-3)'"-->
+<!--                onmouseout="this.style.background='transparent'">-->
+<!--        </button>-->
+<!--      </li>-->
+<!--    </ul>-->
+<!--  </nav>-->
+
+<!--  &lt;!&ndash; Main content &ndash;&gt;-->
+<!--  <main>-->
+<!--    <div class="flex flex-col items-center justify-center text-center px-8 max-md:px-4" -->
+<!--         style="min-height: calc(100vh - 70px); padding-top: 3rem; padding-bottom: 3rem;">-->
+<!--      <div class="w-full max-w-4xl">-->
+<!--        <div class="mb-12">-->
+<!--          <h1 class="text-4xl font-bold mb-4" style="color: var(&#45;&#45;text-primary);">What would you like to analyze?</h1>-->
+<!--          <p class="text-lg" style="color: var(&#45;&#45;text-secondary);">Choose an option below to get started</p>-->
+<!--        </div>-->
+
+<!--        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">-->
+<!--          &lt;!&ndash; Analyze Own Statement &ndash;&gt;-->
+<!--          <a href="{{ url_for('analyze_own') }}" -->
+<!--             class="flex flex-col items-center gap-4 p-10 rounded-xl border-2 no-underline transition-all duration-300 hover:-translate-y-1.5"-->
+<!--             style="background: var(&#45;&#45;bg-2); border-color: var(&#45;&#45;border); color: var(&#45;&#45;text-primary); box-shadow: 0 4px 6px rgba(0,0,0,0.1);"-->
+<!--             onmouseover="this.style.borderColor='var(&#45;&#45;primary)'; this.style.boxShadow='0 20px 25px rgba(0,0,0,0.2)';"-->
+<!--             onmouseout="this.style.borderColor='var(&#45;&#45;border)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">-->
+<!--            <div class="w-20 h-20 flex items-center justify-center text-5xl rounded-xl" -->
+<!--                 style="background: rgba(255, 107, 53, 0.1);">-->
+<!--              💭-->
+<!--            </div>-->
+<!--            <h2 class="text-xl font-semibold m-0" style="color: var(&#45;&#45;text-primary);">Analyze Statement</h2>-->
+<!--            <p class="text-sm m-0" style="color: var(&#45;&#45;text-secondary);">Get emotion analysis for your personal thoughts</p>-->
+<!--          </a>-->
+
+<!--          &lt;!&ndash; Analyze Reddit &ndash;&gt;-->
+<!--          <a href="{{ url_for('reddit_options') }}" -->
+<!--             class="flex flex-col items-center gap-4 p-10 rounded-xl border-2 no-underline transition-all duration-300 hover:-translate-y-1.5"-->
+<!--             style="background: var(&#45;&#45;bg-2); border-color: var(&#45;&#45;border); color: var(&#45;&#45;text-primary); box-shadow: 0 4px 6px rgba(0,0,0,0.1);"-->
+<!--             onmouseover="this.style.borderColor='var(&#45;&#45;primary)'; this.style.boxShadow='0 20px 25px rgba(0,0,0,0.2)';"-->
+<!--             onmouseout="this.style.borderColor='var(&#45;&#45;border)'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">-->
+<!--            <div class="w-20 h-20 flex items-center justify-center text-5xl rounded-xl" -->
+<!--                 style="background: rgba(0, 78, 137, 0.1);">-->
+<!--              📊-->
+<!--            </div>-->
+<!--            <h2 class="text-xl font-semibold m-0" style="color: var(&#45;&#45;text-primary);">Analyze Reddit</h2>-->
+<!--            <p class="text-sm m-0" style="color: var(&#45;&#45;text-secondary);">Explore sentiment across Reddit communities</p>-->
+<!--          </a>-->
+<!--        </div>-->
+
+<!--        <div class="text-center" style="color: var(&#45;&#45;text-secondary);">-->
+<!--          <p>Want to see previous analyses? -->
+<!--            <a href="{{ url_for('history') }}" class="font-semibold no-underline transition-colors duration-200" -->
+<!--               style="color: var(&#45;&#45;primary);"-->
+<!--               onmouseover="this.style.color='#FF5722'" -->
+<!--               onmouseout="this.style.color='var(&#45;&#45;primary)'">-->
+<!--              View your history-->
+<!--            </a>-->
+<!--          </p>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </main>-->
+
+<!--  &lt;!&ndash; Scripts &ndash;&gt;-->
+<!--  <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>-->
+<!--  <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>-->
+
+<!--  <style>-->
+<!--    @keyframes fadeIn {-->
+<!--      from { opacity: 0; transform: translateY(-10px); }-->
+<!--      to { opacity: 1; transform: translateY(0); }-->
+<!--    }-->
+<!--    -->
+<!--    #nav-list.active {-->
+<!--      display: flex !important;-->
+<!--    }-->
+<!--    -->
+<!--    #analyzeDropdown.show {-->
+<!--      display: block !important;-->
+<!--    }-->
+<!--  </style>-->
+<!--</body>-->
+<!--</html>-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Reddit Pulse - Dashboard">
+  <title>Dashboard - Reddit Pulse</title>
+
+  <!-- Theme initialization (prevent flash) -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('reddit-pulse-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved ? saved === 'dark' : prefersDark;
+      if (!isDark) document.documentElement.classList.add('light');
+    })();
+  </script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'selector',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FF6B35',
+            secondary: '#004E89',
+            success: '#10B981',
+            danger: '#EF4444',
+            warning: '#F59E0B',
+            info: '#3B82F6',
+          },
+          fontFamily: {
+            sans: ['Geist Sans', 'Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Theme Variables CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-variables.css') }}">
+</head>
+
+<body class="min-h-screen pt-[70px]">
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 right-0 h-[70px] flex items-center justify-between px-8 max-md:px-4 z-50 border-b backdrop-blur-md shadow-sm bg-[var(--bg-2)] border-[var(--border)]">
+    <a href="{{ url_for('dashboard') }}"
+       class="text-2xl font-extrabold no-underline transition-colors duration-200 text-[var(--primary)] hover:text-[#FF5722]">
+      Reddit Pulse
+    </a>
+
+    <div id="mobile-menu"
+         class="md:hidden flex flex-col gap-[5px] cursor-pointer p-2"
+         aria-label="Toggle navigation menu">
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+    </div>
+
+    <ul id="nav-list"
+        class="hidden md:flex list-none gap-8 m-0 p-0 items-center
+               max-md:flex-col max-md:absolute max-md:top-[60px] max-md:left-0 max-md:right-0
+               max-md:w-full max-md:bg-[var(--bg-1)] max-md:p-6 max-md:gap-3
+               max-md:border-b max-md:border-[var(--border)] max-md:shadow-md">
+
+      <li><a href="{{ url_for('dashboard') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">Dashboard</a></li>
+
+      <li class="relative">
+        <button class="dropbtn flex items-center gap-1 font-medium py-2 transition-colors duration-200 bg-transparent border-0 cursor-pointer text-base text-[var(--text-secondary)] hover:text-[var(--primary)]"
+                aria-expanded="false"
+                aria-controls="analyzeDropdown">
+          Analyze ▾
+        </button>
+        <ul id="analyzeDropdown"
+            class="hidden absolute top-[150%] right-0 min-w-[200px] rounded-xl border border-[var(--border)] overflow-hidden backdrop-blur-xl z-10 bg-[var(--bg-2)] shadow-[0_10px_15px_rgba(0,0,0,0.2)]"
+            role="menu">
+          <li role="none"><a href="{{ url_for('analyze_own') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Statement</a></li>
+          <li role="none"><a href="{{ url_for('reddit_options') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Subreddit</a></li>
+                      <li role="none"><a href="{{ url_for('analyze_post_page') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Post</a></li>
+
+        </ul>
+      </li>
+
+      <li><a href="{{ url_for('history') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">History</a></li>
+      <li><a href="{{ url_for('logout') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--danger)]">Log Out</a></li>
+      <li>
+        <button id="themeToggle" class="bg-transparent border-0 text-2xl p-2 cursor-pointer rounded-lg transition-all duration-200 hover:bg-[var(--bg-3)] hover:rotate-[20deg]" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+    <div class="flex flex-col items-center justify-center text-center px-8 max-md:px-4 min-h-[calc(100vh-70px)] py-12">
+      <div class="w-full max-w-4xl">
+        <!-- Header -->
+        <div class="mb-12">
+          <h1 class="text-4xl font-bold mb-4 text-[var(--text-primary)]">
+            What would you like to analyze?
+          </h1>
+          <p class="text-lg text-[var(--text-secondary)]">
+            Choose an option below to get started
+          </p>
+        </div>
+
+       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+
+  <a href="{{ url_for('analyze_own') }}"
+     class="flex flex-col items-center gap-4 p-10 rounded-xl border-2 border-[var(--border)]
+            bg-[var(--bg-2)] no-underline transition-all duration-300
+            hover:border-[var(--primary)] hover:-translate-y-1.5 hover:shadow-[0_20px_25px_rgba(0,0,0,0.2)]">
+    <div class="w-20 h-20 flex items-center justify-center text-5xl rounded-xl bg-[rgba(255,107,53,0.1)]">
+      💭
+    </div>
+    <h2 class="text-xl font-semibold m-0 text-[var(--text-primary)]">
+      Analyze Statement
+    </h2>
+    <p class="text-sm m-0 text-[var(--text-secondary)] text-center">
+      Get emotion analysis for your personal thoughts
+    </p>
+  </a>
+
+  <a href="{{ url_for('reddit_options') }}"
+     class="flex flex-col items-center gap-4 p-10 rounded-xl border-2 border-[var(--border)]
+            bg-[var(--bg-2)] no-underline transition-all duration-300
+            hover:border-[var(--primary)] hover:-translate-y-1.5 hover:shadow-[0_20px_25px_rgba(0,0,0,0.2)]">
+    <div class="w-20 h-20 flex items-center justify-center text-5xl rounded-xl bg-[rgba(0,78,137,0.1)]">
+      📊
+    </div>
+    <h2 class="text-xl font-semibold m-0 text-[var(--text-primary)]">
+      Analyze Reddit
+    </h2>
+    <p class="text-sm m-0 text-[var(--text-secondary)] text-center">
+      Explore sentiment across Reddit communities
+    </p>
+  </a>
+
+  <a href="{{ url_for('analyze_post_page') }}"
+     class="flex flex-col items-center gap-4 p-10 rounded-xl border-2 border-[var(--border)]
+            bg-[var(--bg-2)] no-underline transition-all duration-300
+            hover:border-[var(--primary)] hover:-translate-y-1.5 hover:shadow-[0_20px_25px_rgba(0,0,0,0.2)]">
+    <div class="w-20 h-20 flex items-center justify-center text-5xl rounded-xl bg-[rgba(168,85,247,0.1)]">
+      ⚖️
+    </div>
+    <h2 class="text-xl font-semibold m-0 text-[var(--text-primary)]">
+      Analyze Post
+    </h2>
+    <p class="text-sm m-0 text-[var(--text-secondary)] text-center">
+      Compare your post draft to a subreddit's overall vibe
+    </p>
+  </a>
+
+</div>
+
+        <!-- Footer -->
+        <div class="text-center text-[var(--text-secondary)]">
+          <p>Want to see previous analyses?
+            <a href="{{ url_for('history') }}"
+               class="font-semibold no-underline transition-colors duration-200 text-[var(--primary)] hover:text-[#FF5722]">
+              View your history
+            </a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Reddit Pulse - Create your account">
+  <title>Sign Up - Reddit Pulse</title>
+
+  <!-- Theme initialization -->
+  <script>
+    (function() {
+      const saved = localStorage.getItem('reddit-pulse-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved ? saved === 'dark' : prefersDark;
+      if (!isDark) document.documentElement.classList.add('light');
+    })();
+  </script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tailwind Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'selector',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FF6B35',
+            secondary: '#004E89',
+            success: '#10B981',
+            danger: '#EF4444',
+            warning: '#F59E0B',
+            info: '#3B82F6',
+          },
+          fontFamily: {
+            sans: ['Geist Sans', 'Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Theme Variables CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-variables.css') }}">
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-8">
+  <!-- Theme toggle -->
+  <button id="themeToggle"
+          class="fixed top-8 right-8 w-[50px] h-[50px] rounded-full flex items-center justify-center
+                 text-2xl cursor-pointer border border-[var(--border)] bg-[var(--bg-2)]
+                 transition-all duration-200 hover:bg-[var(--bg-3)] hover:rotate-[20deg]"
+          title="Toggle dark mode"
+          aria-label="Toggle dark mode">
+  </button>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-5xl items-center">
+    <!-- Brand side -->
+    <div class="hidden md:block text-center">
+      <h1 class="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-[#FF5722] bg-clip-text text-transparent">
+        Reddit Pulse
+      </h1>
+      <p class="text-lg mb-8 text-[var(--text-secondary)]">
+        Analyze the emotional pulse of Reddit
+      </p>
+      <ul class="list-none p-0 inline-block text-left text-[var(--text-secondary)]">
+        <li class="mb-3">✓ Free analysis tools</li>
+        <li class="mb-3">✓ Secure account</li>
+        <li class="mb-3">✓ No email spam</li>
+      </ul>
+    </div>
+
+    <!-- Signup form -->
+    <div class="rounded-2xl p-10 max-md:p-8 border border-[var(--border)] bg-[var(--bg-2)] shadow-[0_20px_25px_rgba(0,0,0,0.2)]">
+      <div class="mb-8 text-center">
+        <h2 class="text-2xl font-semibold mb-2 m-0 text-[var(--text-primary)]">Create Profile</h2>
+        <p class="text-sm m-0 text-[var(--text-secondary)]">Join Reddit Pulse today</p>
+      </div>
+
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="flex gap-3 items-start p-4 rounded-lg border border-[var(--danger)] mb-6
+                      bg-[rgba(239,68,68,0.1)] animate-[slideIn_0.3s_ease]"
+               role="alert">
+            <span class="text-xl flex-shrink-0 leading-6">⚠️</span>
+            <div class="flex-1">
+              <p class="text-sm m-0 leading-6 text-[var(--text-primary)]">{{ messages[0] }}</p>
+            </div>
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form id="signupForm" action="/register" method="POST">
+        <div class="mb-6">
+          <label for="email" class="block mb-2 font-semibold text-sm text-[var(--text-primary)]">
+            Email Address <span class="text-[var(--danger)]">*</span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="w-full px-4 py-3 border border-[var(--border)] rounded-lg font-sans text-base
+                   bg-[var(--bg-2)] text-[var(--text-primary)]
+                   transition-all duration-200 focus:outline-none
+                   focus:border-[var(--primary)] focus:bg-[var(--bg-1)]
+                   focus:shadow-[0_0_0_3px_rgba(255,107,53,0.1)]
+                   placeholder:text-[var(--text-tertiary)]"
+            placeholder="you@example.com"
+            required>
+        </div>
+
+        <div class="mb-6">
+          <label for="username" class="block mb-2 font-semibold text-sm text-[var(--text-primary)]">
+            Username <span class="text-[var(--danger)]">*</span>
+          </label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="w-full px-4 py-3 border border-[var(--border)] rounded-lg font-sans text-base
+                   bg-[var(--bg-2)] text-[var(--text-primary)]
+                   transition-all duration-200 focus:outline-none
+                   focus:border-[var(--primary)] focus:bg-[var(--bg-1)]
+                   focus:shadow-[0_0_0_3px_rgba(255,107,53,0.1)]
+                   placeholder:text-[var(--text-tertiary)]"
+            placeholder="Choose your username"
+            required>
+          <p class="text-xs mt-2 m-0 text-[var(--text-tertiary)]">3-20 characters, letters/numbers/underscore only</p>
+        </div>
+
+        <div class="mb-8">
+          <label for="password" class="block mb-2 font-semibold text-sm text-[var(--text-primary)]">
+            Password <span class="text-[var(--danger)]">*</span>
+          </label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="w-full px-4 py-3 border border-[var(--border)] rounded-lg font-sans text-base
+                   bg-[var(--bg-2)] text-[var(--text-primary)]
+                   transition-all duration-200 focus:outline-none
+                   focus:border-[var(--primary)] focus:bg-[var(--bg-1)]
+                   focus:shadow-[0_0_0_3px_rgba(255,107,53,0.1)]
+                   placeholder:text-[var(--text-tertiary)]"
+            placeholder="At least 8 characters"
+            required>
+          <p class="text-xs mt-2 m-0 text-[var(--text-tertiary)]">Minimum 8 characters recommended</p>
+        </div>
+
+        <!-- Hidden OTP field -->
+        <input type="hidden" name="otp" id="otpField">
+
+        <button type="button"
+                id="sendOtpBtn"
+                onclick="handleSendOtp()"
+                class="w-full inline-flex items-center justify-center px-8 py-4 border-0 rounded-lg
+                       text-lg font-semibold cursor-pointer transition-all duration-200 gap-2
+                       whitespace-nowrap relative overflow-hidden no-underline text-white
+                       bg-[var(--primary)] shadow-[0_4px_12px_rgba(255,107,53,0.3)]
+                       hover:bg-[#FF5722] hover:-translate-y-0.5
+                       hover:shadow-[0_8px_20px_rgba(255,107,53,0.4)]">
+          Send Verification Code
+        </button>
+      </form>
+
+      <div class="text-center mt-6 text-[var(--text-secondary)]">
+        Already have an account?
+        <a href="/"
+           class="font-semibold no-underline transition-colors duration-200 text-[var(--primary)] hover:text-[#FF5722]">
+          Sign in instead
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTP Verification Modal -->
+  <div id="otpModal"
+       class="fixed inset-0 z-[2000] items-center justify-center backdrop-blur hidden bg-[var(--overlay)]">
+    <div class="rounded-xl p-8 w-[90%] max-w-md text-center border border-[var(--border)]
+                bg-[var(--bg-2)] shadow-[0_25px_50px_rgba(0,0,0,0.3)] animate-[slideUp_0.3s_ease]">
+      <div class="mb-6">
+        <h3 class="text-2xl font-bold mb-2 m-0 text-[var(--text-primary)]">Verify Email</h3>
+        <p class="text-sm mb-2 m-0 text-[var(--text-secondary)]">Enter the 4-digit code sent to</p>
+        <p id="displayEmail" class="text-sm font-mono m-0 text-[var(--primary)]"></p>
+      </div>
+
+      <div class="flex justify-center gap-3 mb-8">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" oninput="moveToNext(this, 0)" aria-label="OTP digit 1">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" oninput="moveToNext(this, 1)" aria-label="OTP digit 2">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" oninput="moveToNext(this, 2)" aria-label="OTP digit 3">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric" oninput="moveToNext(this, 3)" aria-label="OTP digit 4">
+      </div>
+
+      <div class="flex gap-3">
+        <button type="button"
+                onclick="cancelOtp()"
+                class="flex-1 inline-flex items-center justify-center px-6 py-3 border border-[var(--border)]
+                       rounded-lg text-base font-semibold cursor-pointer transition-all duration-200 gap-2
+                       bg-[var(--bg-3)] text-[var(--text-primary)]
+                       hover:bg-[var(--bg-2)] hover:border-[var(--primary)]">
+          Cancel
+        </button>
+        <button type="button"
+                onclick="confirmOtp()"
+                class="flex-1 inline-flex items-center justify-center px-6 py-3 border-0 rounded-lg
+                       text-base font-semibold cursor-pointer transition-all duration-200 gap-2 text-white
+                       bg-[var(--primary)] shadow-[0_4px_12px_rgba(255,107,53,0.3)]
+                       hover:bg-[#FF5722] hover:-translate-y-0.5
+                       hover:shadow-[0_8px_20px_rgba(255,107,53,0.4)]">
+          Verify & Create
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/form-validator.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+
+  <script>
+    // Handle Send OTP
+    async function handleSendOtp() {
+      const email = document.getElementById('email').value.trim();
+      const btn = document.getElementById('sendOtpBtn');
+
+      if (!email || !email.includes('@')) {
+        if (window.Toast) {
+          Toast.error('Please enter a valid email address');
+        } else {
+          alert('Please enter a valid email address');
+        }
+        return;
+      }
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('/send_otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({ email: email })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          document.getElementById('displayEmail').textContent = email;
+          document.getElementById('otpModal').style.display = 'flex';
+          document.querySelectorAll('.otp-box')[0].focus();
+
+          if (window.Toast) {
+            Toast.success('Code sent! Check your email.');
+          }
+        } else {
+          if (window.Toast) {
+            Toast.error(result.message || 'Failed to send OTP');
+          } else {
+            alert(result.message || 'Failed to send OTP');
+          }
+        }
+      } catch (err) {
+        console.error('OTP Error:', err);
+        if (window.Toast) {
+          Toast.error('Connection error. Please try again.');
+        } else {
+          alert('Connection error. Please try again.');
+        }
+      } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+
+    // Move to next OTP box
+    function moveToNext(field, index) {
+      if (field.value.length >= 1) {
+        const boxes = document.querySelectorAll('.otp-box');
+        if (index < 3) {
+          boxes[index + 1].focus();
+        }
+      }
+    }
+
+    // Confirm OTP
+    function confirmOtp() {
+      const boxes = document.querySelectorAll('.otp-box');
+      let otpCode = '';
+
+      boxes.forEach(box => {
+        otpCode += box.value;
+      });
+
+      if (otpCode.length < 4) {
+        if (window.Toast) {
+          Toast.error('Please enter all 4 digits');
+        } else {
+          alert('Please enter all 4 digits');
+        }
+        return;
+      }
+
+      document.getElementById('otpField').value = otpCode;
+      document.getElementById('signupForm').submit();
+    }
+
+    // Cancel OTP
+    function cancelOtp() {
+      document.getElementById('otpModal').style.display = 'none';
+      document.querySelectorAll('.otp-box').forEach(box => box.value = '');
+    }
+  </script>
+</body>
+</html>

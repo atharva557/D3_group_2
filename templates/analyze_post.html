@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe Match - Reddit Pulse</title>
+
+  <script>
+    (function() {
+      const saved = localStorage.getItem('reddit-pulse-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved ? saved === 'dark' : prefersDark;
+      if (!isDark) document.documentElement.classList.add('light');
+    })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'selector',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FF6B35',
+            secondary: '#004E89',
+            success: '#10B981',
+            danger: '#EF4444',
+            warning: '#F59E0B',
+            info: '#3B82F6',
+          },
+          fontFamily: {
+            sans: ['Geist Sans', 'Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-variables.css') }}">
+</head>
+
+<body class="min-h-screen pt-[70px] flex flex-col transition-colors duration-300 bg-[var(--bg-0)] text-[var(--text-primary)]">
+
+  <nav class="fixed top-0 left-0 right-0 h-[70px] flex items-center justify-between px-8 max-md:px-4 z-50 border-b backdrop-blur-md shadow-sm bg-[var(--bg-2)] border-[var(--border)]">
+    <a href="{{ url_for('dashboard') }}" class="text-2xl font-extrabold no-underline transition-colors duration-200 text-[var(--primary)] hover:text-[#FF5722]">
+      Reddit Pulse
+    </a>
+
+    <div id="mobile-menu" class="md:hidden flex flex-col gap-[5px] cursor-pointer p-2">
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+    </div>
+
+    <ul id="nav-list" class="hidden md:flex list-none gap-8 m-0 p-0 items-center max-md:flex-col max-md:absolute max-md:top-[60px] max-md:left-0 max-md:right-0 max-md:w-full max-md:bg-[var(--bg-1)] max-md:p-6 max-md:gap-3 max-md:border-b max-md:border-[var(--border)] max-md:shadow-md">
+      <li><a href="{{ url_for('dashboard') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">Dashboard</a></li>
+
+      <li class="relative">
+        <button class="dropbtn flex items-center gap-1 font-medium py-2 transition-colors duration-200 bg-transparent border-0 cursor-pointer text-base text-[var(--text-secondary)] hover:text-[var(--primary)]">
+          Analyze ▾
+        </button>
+        <ul id="analyzeDropdown" class="hidden absolute top-[150%] right-0 min-w-[200px] rounded-xl border border-[var(--border)] overflow-hidden backdrop-blur-xl z-10 bg-[var(--bg-2)] shadow-[0_10px_15px_rgba(0,0,0,0.2)]">
+          <li><a href="{{ url_for('analyze_own') }}" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Statement</a></li>
+          <li><a href="{{ url_for('reddit_options') }}" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Subreddit</a></li>
+          <li><a href="{{ url_for('analyze_post_page') }}" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Post</a></li>
+        </ul>
+      </li>
+
+      <li><a href="{{ url_for('history') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">History</a></li>
+      <li><a href="{{ url_for('logout') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--danger)]">Log Out</a></li>
+      <li>
+        <button id="themeToggle" class="bg-transparent border-0 text-2xl p-2 cursor-pointer rounded-lg transition-all duration-200 hover:bg-[var(--bg-3)] hover:rotate-[20deg]" title="Toggle dark mode">
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <main class="flex-grow flex items-center justify-center p-6">
+    <div class="w-full max-w-2xl rounded-2xl p-10 shadow-2xl border bg-[var(--bg-2)] border-[var(--border)]">
+
+      <div class="text-center mb-10">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-500/10 text-4xl mb-4">
+          ⚖️
+        </div>
+        <h1 class="text-3xl font-bold mb-2 text-[var(--text-primary)]">Vibe Matcher</h1>
+        <p class="text-[var(--text-secondary)]">Check if your post fits the community mood before you submit.</p>
+      </div>
+
+      <form action="/check_vibe" method="POST" class="space-y-6">
+
+        <div>
+            <label class="block mb-2 font-bold text-sm text-[var(--text-secondary)]">Target Subreddit</label>
+            <div class="relative group">
+                <span class="absolute left-4 top-3.5 font-bold transition text-[var(--text-tertiary)] group-focus-within:text-[var(--primary)]">r/</span>
+                <input type="text" name="subreddit" placeholder="technology" required
+                    class="w-full pl-10 pr-4 py-3 rounded-lg focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] transition
+                           bg-[var(--bg-1)] border-[var(--border)] text-[var(--text-primary)] placeholder-[var(--text-tertiary)]">
+            </div>
+        </div>
+
+        <div>
+            <label class="block mb-2 font-bold text-sm text-[var(--text-secondary)]">Your Draft Post</label>
+            <textarea name="post_content" placeholder="Type your title and body text here..." required
+                class="w-full p-4 h-48 rounded-lg focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] transition resize-none
+                       bg-[var(--bg-1)] border-[var(--border)] text-[var(--text-primary)] placeholder-[var(--text-tertiary)]"></textarea>
+            <div class="flex justify-between mt-2 text-xs text-[var(--text-tertiary)]">
+              <span>Be honest with your draft for best results.</span>
+              <span>0 / 5000</span>
+            </div>
+        </div>
+
+        <button type="submit"
+            class="w-full py-4 bg-[var(--primary)] text-white font-bold rounded-lg shadow-lg hover:brightness-110 transition-all transform hover:-translate-y-1 active:scale-95">
+            Check Compatibility
+        </button>
+
+      </form>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+</body>
+</html>

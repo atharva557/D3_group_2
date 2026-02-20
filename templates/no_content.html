@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="No Content Found - Reddit Pulse">
+  <title>No Results - Reddit Pulse</title>
+
+  <script>
+    (function() {
+      const saved = localStorage.getItem('reddit-pulse-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = saved ? saved === 'dark' : prefersDark;
+      if (!isDark) document.documentElement.classList.add('light');
+    })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'selector',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FF6B35',
+            secondary: '#004E89',
+            success: '#10B981',
+            danger: '#EF4444',
+            warning: '#F59E0B',
+            info: '#3B82F6',
+          },
+          fontFamily: {
+            sans: ['Geist Sans', 'Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-variables.css') }}">
+</head>
+
+<body class="min-h-screen pt-[70px]">
+  <nav class="fixed top-0 left-0 right-0 h-[70px] flex items-center justify-between px-8 max-md:px-4 z-50 border-b backdrop-blur-md shadow-sm bg-[var(--bg-2)] border-[var(--border)]">
+    <a href="{{ url_for('dashboard') }}"
+       class="text-2xl font-extrabold no-underline transition-colors duration-200 text-[var(--primary)] hover:text-[#FF5722]">
+      Reddit Pulse
+    </a>
+
+    <div id="mobile-menu"
+         class="md:hidden flex flex-col gap-[5px] cursor-pointer p-2"
+         aria-label="Toggle navigation menu">
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+      <span class="w-[25px] h-[3px] bg-[var(--text-primary)] rounded-sm transition-all duration-300"></span>
+    </div>
+
+    <ul id="nav-list"
+        class="hidden md:flex list-none gap-8 m-0 p-0 items-center
+               max-md:flex-col max-md:absolute max-md:top-[60px] max-md:left-0 max-md:right-0
+               max-md:w-full max-md:bg-[var(--bg-1)] max-md:p-6 max-md:gap-3
+               max-md:border-b max-md:border-[var(--border)] max-md:shadow-md">
+
+      <li><a href="{{ url_for('dashboard') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">Dashboard</a></li>
+
+      <li class="relative">
+        <button class="dropbtn flex items-center gap-1 font-medium py-2 transition-colors duration-200 bg-transparent border-0 cursor-pointer text-base text-[var(--text-secondary)] hover:text-[var(--primary)]"
+                aria-expanded="false"
+                aria-controls="analyzeDropdown">
+          Analyze ▾
+        </button>
+        <ul id="analyzeDropdown"
+            class="hidden absolute top-[150%] right-0 min-w-[200px] rounded-xl border border-[var(--border)] overflow-hidden backdrop-blur-xl z-10 bg-[var(--bg-2)] shadow-[0_10px_15px_rgba(0,0,0,0.2)]"
+            role="menu">
+          <li role="none"><a href="{{ url_for('analyze_own') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Statement</a></li>
+          <li role="none"><a href="{{ url_for('reddit_options') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Subreddit</a></li>
+          <li role="none"><a href="{{ url_for('analyze_post_page') }}" role="menuitem" class="block px-5 py-3 no-underline transition-all duration-200 text-[var(--text-secondary)] hover:bg-[rgba(255,107,53,0.1)] hover:text-[var(--primary)] hover:pl-6">Post</a></li>
+        </ul>
+      </li>
+
+      <li><a href="{{ url_for('history') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--text-secondary)] hover:text-[var(--primary)]">History</a></li>
+      <li><a href="{{ url_for('logout') }}" class="no-underline font-medium py-2 transition-colors duration-200 text-[var(--danger)]">Log Out</a></li>
+      <li>
+        <button id="themeToggle" class="bg-transparent border-0 text-2xl p-2 cursor-pointer rounded-lg transition-all duration-200 hover:bg-[var(--bg-3)] hover:rotate-[20deg]" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
+      </li>
+    </ul>
+  </nav>
+
+  <main>
+    <div class="flex flex-col items-center justify-center px-8 max-md:px-4 min-h-[calc(100vh-70px)] py-12">
+      <div class="w-full max-w-lg rounded-2xl p-10 max-md:p-8 text-center border border-[var(--border)] bg-[var(--bg-2)] shadow-[0_20px_25px_rgba(0,0,0,0.2)] animate-[slideUp_0.4s_ease]">
+
+        <div class="w-24 h-24 mx-auto mb-6 flex items-center justify-center rounded-full bg-[rgba(255,107,53,0.1)] text-5xl">
+          📭
+        </div>
+
+        <h2 class="text-3xl font-bold mb-3 m-0 text-[var(--text-primary)]">No Content Found</h2>
+
+        <p class="text-base m-0 mb-8 leading-relaxed text-[var(--text-secondary)]">
+          We couldn't find any posts for <strong class="text-[var(--primary)]">"{{ query }}"</strong>. The subreddit/user might not exist, or there are no recent text posts to analyze.
+        </p>
+
+        <div class="flex flex-col gap-4">
+          <a href="{{ url_for('reddit_options') }}"
+             class="w-full inline-flex items-center justify-center px-8 py-4 border-0 rounded-lg
+                    text-lg font-semibold cursor-pointer transition-all duration-200 gap-2
+                    whitespace-nowrap no-underline text-white
+                    bg-[var(--primary)] shadow-[0_4px_12px_rgba(255,107,53,0.3)]
+                    hover:bg-[#FF5722] hover:-translate-y-0.5
+                    hover:shadow-[0_8px_20px_rgba(255,107,53,0.4)]">
+            Try Another Search
+          </a>
+
+          <a href="{{ url_for('dashboard') }}"
+             class="w-full inline-flex items-center justify-center px-8 py-4 border border-[var(--border)] rounded-lg
+                    text-lg font-semibold cursor-pointer transition-all duration-200 gap-2
+                    whitespace-nowrap no-underline text-[var(--text-primary)] bg-[var(--bg-1)]
+                    hover:bg-[var(--bg-3)] hover:border-[var(--text-secondary)]">
+            Back to Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/theme-manager.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
+</body>
+</html>
